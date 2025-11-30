@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         OnChainCreatorTool - Compact
+// @name         OnChainCreatorTool - Final Compact
 // @namespace    http://tampermonkey.net/
-// @version      0.1
-// @description  Onchain Creator Tool
-// @author       Yun
+// @version      0.2
+// @description  Onchain Creator Tool - Tout en une, compact, avec update check
+// @author       Yun + final fix
 // @match        https://app.layer3.xyz/*
 // @grant        unsafeWindow
 // @grant        GM_setValue
@@ -59,39 +59,26 @@
         soneium_play: { id: 1868, address: "0xC0f6015F69aD9a6768823cd029A5EF8a8f3eab89", color: "#1D4ED8", value: "0x0", data: "0x", gas: "0x927c0" },
     };
 
+    const CURRENT_VERSION = GM_info.script.version;
+
     const defaultVisibility = Object.keys(blockchains).reduce((a, k) => ({...a, [k]: true}), {});
     let buttonVisibility = { ...defaultVisibility, ...GM_getValue("buttonVisibility", {}) };
     let savedSelections = GM_getValue("savedSelections", {1:{...defaultVisibility},2:{...defaultVisibility},3:{...defaultVisibility},4:{...defaultVisibility},5:{...defaultVisibility}});
     let isSavePending = false;
 
-    // === ICÔNE FLOTTANTE (reprise de l'ancienne version exacte) ===
+    // === ICÔNE FLOTTANTE (exactement comme avant) ===
     const miniIcon = document.createElement("div");
     miniIcon.style.cssText = `
         position:fixed;top:10px;left:10px;z-index:10002;background:#FF5722;width:30px;height:30px;
         border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;
         box-shadow:0 0 5px rgba(0,0,0,0.3);
     `;
-    const iconSpan = document.createElement("span");
-    iconSpan.textContent = "➕";
-    iconSpan.style.cssText = "color:#fff;font-size:18px;";
-    miniIcon.appendChild(iconSpan);
+    const plus = document.createElement("span");
+    plus.textContent = "Plus";
+    plus.style.cssText = "color:#fff;font-size:18px;";
+    miniIcon.appendChild(plus);
 
-    miniIcon.onclick = () => { container.style.display = "block"; miniIcon.style.display = "none"; };
-
-     // === BOUTON CROIX EN HAUT À DROITE (comme dans la vraie fenêtre de transaction) ===
-    const closeCross = document.createElement("button");
-    closeCross.textContent = "X";
-    closeCross.style.cssText = `
-        position:absolute;top:5px;right:5px;width:30px;height:30px;padding:0;background:#FF5722;color:#fff;
-        border:none;border-radius:50%;cursor:pointer;font-size:12px;line-height:20px;font-weight:bold;
-        box-shadow:0 0 5px rgba(0,0,0,0.3);z-index:10;
-    `;
-    closeCross.onclick = () => {
-        container.style.display = "none";
-        miniIcon.style.display = "flex";
-    };
-
-    // === FENÊTRE UNIQUE COMPACTE ===
+    // === FENÊTRE UNIQUE ===
     const container = document.createElement("div");
     container.style.cssText = `
         position:fixed;top:10px;left:10px;z-index:10001;background:#fff;padding:10px;width:300px;
@@ -99,18 +86,26 @@
         font-size:12px;font-family:Arial,sans-serif;max-height:90vh;overflow:hidden;display:none;
     `;
 
+    // Titre + version
     const title = document.createElement("h3");
-    title.textContent = "OnChainCreatorTool v1.1";
-    title.style.margin = "0 0 8px 0";
-    title.style.fontSize = "14px";
+    title.textContent = `OnChainCreatorTool v${CURRENT_VERSION}`;
+    title.style.cssText = "margin:0 0 8px 0;font-size:14px;display:inline-block;";
 
+    // Croix en haut à droite
+    const closeCross = document.createElement("button");
+    closeCross.textContent = "X";
+    closeCross.style.cssText = `
+        position:absolute;top:5px;right:5px;width:30px;height:30px;padding:0;background:#FF5722;color:#fff;
+        border:none;border-radius:50%;cursor:pointer;font-size:12px;line-height:20px;font-weight:bold;
+        box-shadow:0 0 5px rgba(0,0,0,0.3);
+    `;
+
+    // Update label (vérification réelle)
     const updateLabel = document.createElement("div");
-    updateLabel.textContent = "Up to date";
-    updateLabel.style.fontSize = "11px";
-    updateLabel.style.color = "#4CAF50";
-    updateLabel.style.marginBottom = "8px";
+    updateLabel.textContent = "Checking for update...";
+    updateLabel.style.cssText = "font-size:11px;margin-bottom:8px;color:#333;";
 
-    // Status + Connect
+    // === Contenu (identique à avant) ===
     const status = document.createElement("div");
     status.textContent = "Not connected";
     status.style.cssText = "margin-bottom:8px;padding:5px;background:#f0f0f0;border-radius:3px;font-size:11px;";
@@ -119,7 +114,6 @@
     connectBtn.textContent = "Connect";
     connectBtn.style.cssText = "width:100%;padding:6px;background:#4CAF50;color:#fff;border:none;border-radius:3px;cursor:pointer;margin-bottom:8px;";
 
-    // Nombre de tx
     const countLabel = document.createElement("div");
     countLabel.textContent = "Number of transactions:";
     countLabel.style.margin = "8px 0 4px 0";
@@ -128,17 +122,16 @@
     countInput.type = "number"; countInput.value = 1; countInput.min = 1;
     countInput.style.cssText = "width:60px;padding:4px;border:1px solid #ccc;border-radius:3px;margin-bottom:8px;";
 
-    // === ZONE DÉFILABLE POUR LES BOUTONS BLOCKCHAINS ===
     const scrollArea = document.createElement("div");
     scrollArea.style.cssText = "max-height:180px;overflow-y:auto;border:1px solid #ddd;border-radius:3px;padding:5px;margin-bottom:8px;background:#fafafa;";
-
     const grid = document.createElement("div");
     grid.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:5px;";
+    scrollArea.appendChild(grid);
 
     const buttons = {};
     Object.entries(blockchains).forEach(([name, cfg]) => {
         const b = document.createElement("button");
-        b.textContent = name.charAt(0).toUpperCase() + name.slice(1).replace(/_/g, " ");
+        b.textContent = name.charAt(0).toUpperCase() + name.slice(1);
         b.style.cssText = `padding:6px;background:${cfg.color};color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:12px;
                            display:${buttonVisibility[name] !== false ? "block" : "none"};`;
         b.disabled = true;
@@ -146,14 +139,12 @@
         buttons[name] = b;
         grid.appendChild(b);
     });
-    scrollArea.appendChild(grid);
 
     const allBtn = document.createElement("button");
     allBtn.textContent = "ALL";
     allBtn.disabled = true;
     allBtn.style.cssText = "width:100%;padding:6px;background:#2196F3;color:#fff;border:none;border-radius:3px;cursor:pointer;margin-bottom:8px;";
 
-    // === MENU DE SÉLECTION (comme avant) ===
     const selectBtn = document.createElement("button");
     selectBtn.textContent = "Select Blockchains";
     selectBtn.style.cssText = "width:100%;padding:5px;background:#607D8B;color:#fff;border:none;border-radius:3px;cursor:pointer;margin-bottom:5px;";
@@ -171,7 +162,6 @@
         lbl.textContent = name.charAt(0).toUpperCase() + name.slice(1);
         div.appendChild(cb); div.appendChild(lbl);
         dropdown.appendChild(div);
-
         cb.onchange = () => {
             buttonVisibility[name] = cb.checked;
             buttons[name].style.display = cb.checked ? "block" : "none";
@@ -181,14 +171,12 @@
 
     const quickRow = document.createElement("div");
     quickRow.style.cssText = "display:flex;gap:4px;margin-bottom:5px;";
-
     ["ALL","1","2","3","4","5","CLEAR"].forEach(t => {
         const b = document.createElement("button");
         b.textContent = t;
         b.style.cssText = "flex:1;padding:5px;font-size:11px;color:#fff;border:none;border-radius:3px;cursor:pointer;";
-        b.style.background = t==="ALL" ? "#4CAF50" : t==="CLEAR" ? "#f44336" : "#607D8B";
+        b.style.background = t==="ALL"?"#4CAF50":t==="CLEAR"?"#f44336":"#607D8B";
         quickRow.appendChild(b);
-
         b.onclick = () => {
             if (["1","2","3","4","5"].includes(t)) {
                 if (isSavePending) {
@@ -221,10 +209,6 @@
     saveSelBtn.style.cssText = "width:100%;padding:5px;background:#4CAF50;color:#fff;border:none;border-radius:3px;cursor:pointer;";
     saveSelBtn.onclick = () => { isSavePending=true; saveSelBtn.style.background="#FF9800"; };
 
-    const closeBtn = document.createElement("button");
-    closeBtn.textContent = "Close";
-    closeBtn.style.cssText = "width:100%;padding:6px;margin-top:8px;background:#FF5722;color:#fff;border:none;border-radius:3px;cursor:pointer;";
-
     // Assemblage
     container.appendChild(title);
     container.appendChild(closeCross);
@@ -239,17 +223,37 @@
     container.appendChild(dropdown);
     container.appendChild(quickRow);
     container.appendChild(saveSelBtn);
-    container.appendChild(closeBtn);
 
     document.body.appendChild(miniIcon);
     document.body.appendChild(container);
 
-    // === OUVERTURE/FERMETURE ===
+    // === ÉVÉNEMENTS ===
     miniIcon.onclick = () => { container.style.display = "block"; miniIcon.style.display = "none"; };
-    closeBtn.onclick = () => { container.style.display = "none"; miniIcon.style.display = "flex"; };
-    selectBtn.onclick = () => dropdown.style.display = dropdown.style.display==="none" ? "block" : "none";
+    closeCross.onclick = () => { container.style.display = "none"; miniIcon.style.display = "flex"; };
+    selectBtn.onclick = () => dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
 
-    // === WALLET & TX ===
+    // === CHECK UPDATE (exactement comme avant) ===
+    async function checkForUpdate() {
+        try {
+            const r = await fetch(GM_info.script.updateURL + "?t=" + Date.now());
+            const text = await r.text();
+            const match = text.match(/@version\s+([\d.]+)/);
+            if (match && match[1] !== CURRENT_VERSION) {
+                updateLabel.innerHTML = `Update v${match[1]} available <a href="${GM_info.script.updateURL}" target="_blank" style="color:#FF5722;text-decoration:underline;">Download</a>`;
+                updateLabel.style.color = "#FF5722";
+            } else {
+                updateLabel.textContent = "Up to date";
+                updateLabel.style.color = "#4CAF50";
+            }
+        } catch (e) {
+            updateLabel.textContent = "Update check failed";
+            updateLabel.style.color = "#999";
+        }
+    }
+    checkForUpdate();
+    setInterval(checkForUpdate, 30 * 60 * 1000);
+
+    // === WALLET & TX (inchangé) ===
     let account = null;
     connectBtn.onclick = async () => {
         if (!unsafeWindow.ethereum) return status.textContent = "No wallet";
