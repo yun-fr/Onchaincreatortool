@@ -8,8 +8,8 @@
 // @grant        unsafeWindow
 // @grant        GM_setValue
 // @grant        GM_getValue
-// @updateURL    https://raw.githubusercontent.com/yun-fr/layer3-autoref/main/Onchaincreatortool_script
-// @downloadURL  https://raw.githubusercontent.com/yun-fr/layer3-autoref/main/Onchaincreatortool_script
+// @updateURL    https://raw.githubusercontent.com/yun-fr/Onchaincreatortool/main/Onchaincreatortool_script
+// @downloadURL  https://raw.githubusercontent.com/yun-fr/Onchaincreatortool/main/Onchaincreatortool_script
 // ==/UserScript==
 
 (function () {
