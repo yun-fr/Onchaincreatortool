@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         OnChainCreatorTool - Final Compact
 // @namespace    http://tampermonkey.net/
-// @version      0.3
+// @version      0.3b
 // @description  Onchain Creator Tool - Tout en une, compact, avec update check
-// @author       Yun + final fix
+// @author       Yun
 // @match        https://app.layer3.xyz/*
 // @grant        unsafeWindow
 // @grant        GM_setValue
@@ -59,7 +59,6 @@
         soneium_play: { id: 1868, address: "0xC0f6015F69aD9a6768823cd029A5EF8a8f3eab89", color: "#1D4ED8", value: "0x0", data: "0x", gas: "0x927c0" },
     };
 
-
     const CURRENT_VERSION = GM_info.script.version;
 
     const defaultVisibility = Object.keys(blockchains).reduce((a, k) => ({...a, [k]: true}), {});
@@ -69,15 +68,23 @@
 
     // === ICÔNE FLOTTANTE ===
     const miniIcon = document.createElement("div");
-    miniIcon.style.cssText = `position:fixed;top:10px;left:10px;z-index:10002;background:#FF5722;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 5px rgba(0,0,0,0.3);`;
+    miniIcon.style.cssText = `
+        position:fixed;top:10px;left:10px;z-index:10002;background:#FF5722;width:30px;height:30px;
+        border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;
+        box-shadow:0 0 5px rgba(0,0,0,0.3);
+    `;
     const plus = document.createElement("span");
-    plus.textContent = "➕";
+    plus.textContent = "Plus";
     plus.style.cssText = "color:#fff;font-size:18px;";
     miniIcon.appendChild(plus);
 
     // === FENÊTRE UNIQUE ===
     const container = document.createElement("div");
-    container.style.cssText = `position:fixed;top:10px;left:10px;z-index:10001;background:#fff;padding:10px;width:300px;border:2px solid #000;border-radius:5px;box-shadow:0 0 10px rgba(0,0,0,0.5);font-size:12px;font-family:Arial,sans-serif;max-height:90vh;overflow:hidden;display:none;`;
+    container.style.cssText = `
+        position:fixed;top:10px;left:10px;z-index:10001;background:#fff;padding:10px;width:300px;
+        border:2px solid #000;border-radius:5px;box-shadow:0 0 10px rgba(0,0,0,0.5);
+        font-size:12px;font-family:Arial,sans-serif;max-height:90vh;overflow:hidden;display:none;
+    `;
 
     const title = document.createElement("h3");
     title.textContent = `OnChainCreatorTool v${CURRENT_VERSION}`;
@@ -85,7 +92,11 @@
 
     const closeCross = document.createElement("button");
     closeCross.textContent = "X";
-    closeCross.style.cssText = `position:absolute;top:5px;right:5px;width:30px;height:30px;padding:0;background:#FF5722;color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:12px;line-height:20px;font-weight:bold;box-shadow:0 0 5px rgba(0,0,0,0.3);`;
+    closeCross.style.cssText = `
+        position:absolute;top:5px;right:5px;width:30px;height:30px;padding:0;background:#FF5722;color:#fff;
+        border:none;border-radius:50%;cursor:pointer;font-size:12px;line-height:20px;font-weight:bold;
+        box-shadow:0 0 5px rgba(0,0,0,0.3);
+    `;
 
     const updateLabel = document.createElement("div");
     updateLabel.textContent = "Checking for update...";
@@ -99,22 +110,24 @@
     connectBtn.textContent = "Connect";
     connectBtn.style.cssText = "width:100%;padding:6px;background:#4CAF50;color:#fff;border:none;border-radius:3px;cursor:pointer;margin-bottom:8px;";
 
-    // Ligne unique : label + input sur la même ligne
+    // Ligne unique : label + input
     const countRow = document.createElement("div");
-    countRow.style.cssText = "display:flex;align-items:center;gap:8px;margin:8px 0;";
+    countRow.style.cssText = "display:flex;align-items:center;justify-content:space-between;margin:8px 0;";
 
-    const countLabel = document.createElement("div");
+    const countLabel = document.createElement("span");
     countLabel.textContent = "Number of transactions:";
-    countLabel.style.cssText = "white-space:nowrap;font-size:12px;";
+    countLabel.style.cssText = "font-size:12px;";
 
     const countInput = document.createElement("input");
-    countInput.type = "number"; countInput.value = 1; countInput.min = 1;
+    countInput.type = "number";
+    countInput.value = 1;
+    countInput.min = 1;
     countInput.style.cssText = "width:70px;padding:4px;border:1px solid #ccc;border-radius:3px;font-size:12px;";
 
     countRow.appendChild(countLabel);
     countRow.appendChild(countInput);
 
-    // Zone défilable des boutons
+    // Zone défilable
     const scrollArea = document.createElement("div");
     scrollArea.style.cssText = "max-height:180px;overflow-y:auto;border:1px solid #ddd;border-radius:3px;padding:5px;margin-bottom:8px;background:#fafafa;";
     const grid = document.createElement("div");
@@ -125,7 +138,8 @@
     Object.entries(blockchains).forEach(([name, cfg]) => {
         const b = document.createElement("button");
         b.textContent = name.charAt(0).toUpperCase() + name.slice(1);
-        b.style.cssText = `padding:6px;background:${cfg.color};color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:12px;display:${buttonVisibility[name] !== false ? "block" : "none"};`;
+        b.style.cssText = `padding:6px;background:${cfg.color};color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:12px;
+                           display:${buttonVisibility[name] !== false ? "block" : "none"};`;
         b.disabled = true;
         b.onclick = () => sendTransfer(cfg.id, name, cfg.address);
         buttons[name] = b;
@@ -169,7 +183,31 @@
         b.style.cssText = "flex:1;padding:5px;font-size:11px;color:#fff;border:none;border-radius:3px;cursor:pointer;";
         b.style.background = t==="ALL"?"#4CAF50":t==="CLEAR"?"#f44336":"#607D8B";
         quickRow.appendChild(b);
-        b.onclick = () => { /* même code que avant */ };
+        b.onclick = () => {
+            if (["1","2","3","4","5"].includes(t)) {
+                if (isSavePending) {
+                    savedSelections[t] = {...buttonVisibility};
+                    GM_setValue("savedSelections", savedSelections);
+                    alert("Saved in slot "+t);
+                    isSavePending = false;
+                    saveSelBtn.style.background = "#4CAF50";
+                } else {
+                    const sel = savedSelections[t] || defaultVisibility;
+                    Object.keys(blockchains).forEach(k => {
+                        buttonVisibility[k] = sel[k] !== false;
+                        buttons[k].style.display = buttonVisibility[k] ? "block" : "none";
+                        dropdown.querySelector("#cb"+k).checked = buttonVisibility[k];
+                    });
+                    GM_setValue("buttonVisibility", buttonVisibility);
+                }
+            } else if (t==="ALL") {
+                Object.keys(blockchains).forEach(k => { buttonVisibility[k]=true; buttons[k].style.display="block"; dropdown.querySelector("#cb"+k).checked=true; });
+                GM_setValue("buttonVisibility", buttonVisibility);
+            } else if (t==="CLEAR") {
+                Object.keys(blockchains).forEach(k => { buttonVisibility[k]=false; buttons[k].style.display="none"; dropdown.querySelector("#cb"+k).checked=false; });
+                GM_setValue("buttonVisibility", buttonVisibility);
+            }
+        };
     });
 
     const saveSelBtn = document.createElement("button");
@@ -199,7 +237,7 @@
     closeCross.onclick = () => { container.style.display = "none"; miniIcon.style.display = "flex"; };
     selectBtn.onclick = () => dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
 
-    // === CHECK UPDATE (exactement comme avant) ===
+    // Check update
     async function checkForUpdate() {
         try {
             const r = await fetch(GM_info.script.updateURL + "?t=" + Date.now());
@@ -220,7 +258,7 @@
     checkForUpdate();
     setInterval(checkForUpdate, 30 * 60 * 1000);
 
-    // === WALLET & TX (inchangé) ===
+    // Wallet & TX
     let account = null;
     connectBtn.onclick = async () => {
         if (!unsafeWindow.ethereum) return status.textContent = "No wallet";
