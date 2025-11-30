@@ -1,0 +1,289 @@
+// ==UserScript==
+// @name         OnChainCreatorTool - Compact
+// @namespace    http://tampermonkey.net/
+// @version      0.1
+// @description  Onchain Creator Tool
+// @author       Yun
+// @match        https://app.layer3.xyz/*
+// @grant        unsafeWindow
+// @grant        GM_setValue
+// @grant        GM_getValue
+// @updateURL    https://raw.githubusercontent.com/yun-fr/layer3-autoref/main/Onchaincreatortool_script
+// @downloadURL  https://raw.githubusercontent.com/yun-fr/layer3-autoref/main/Onchaincreatortool_script
+// ==/UserScript==
+
+(function () {
+    "use strict";
+
+    const blockchains = {
+        ape: { id: 33139, address: "0xa06e1351E2fD2D45b5D35633ca7eCF328684a109", color: "#3B82F6", value: "0x0", data: "0x", gas: "0x927c0" },
+        arbitrum: { id: 42161, address: "0xe4A0b241D8345d86FB140D40c87C5fbDd685B9dd", color: "#2D3748", value: "0x0", data: "0x", gas: "0x927c0" },
+        base: { id: 8453, address: "0x3C54883Ce0d86b3abB26A63744bEb853Ea99a403", color: "#2563EB", value: "0x0", data: "0x", gas: "0x927c0" },
+        berachain: { id: 80094, address: "0xf909c4Ae16622898b885B89d7F839E0244851c66", color: "#F59E0B", value: "0x0", data: "0x", gas: "0x927c0" },
+        bnb: { id: 56, address: "0xeeeeee9eC4769A09a76A83C7bC42b185872860eE", color: "#FACC15", value: "0x0", data: "0x", gas: "0x927c0" },
+        bob: { id: 60808, address: "0x00000000aa467eba42a3d604b3d74d63b2b6c6cb", color: "#60A5FA", value: "0x0", data: "0x", gas: "0x927c0" },
+        celo: { id: 42220, address: "0x2Fc617E933a52713247CE25730f6695920B3befe", color: "#FBBF24", value: "0x0", data: "0x", gas: "0x927c0" },
+        ink: { id: 57073, address: "0x7F4babd2C7D35221e72Ab67Ea72Cba99573A0089", color: "#EF4444", value: "0x0", data: "0x", gas: "0x927c0" },
+        katana: { id: 747474, address: "0x9ff28846CD0640BA4AAc04d3eBBE651cAc5FE609", color: "#FFD700", value: "0x0", data: "0x", gas: "0x927c0" },
+        fuse: { id: 122, address: "0x2Fc617E933a52713247CE25730f6695920B3befe", color: "#22C55E", value: "0x0", data: "0x", gas: "0x927c0" },
+        hyperEVM: { id: 999, address: "0x391E7C679d29bD940d63be94AD22A25d25b5A604", color: "#10B981", value: "0x0", data: "0x", gas: "0x927c0" },
+        linea: { id: 59144, address: "0xe10Add2ad591A7AC3CA46788a06290De017b9fB4", color: "#1F2937", value: "0x0", data: "0x", gas: "0x927c0" },
+        lisk: { id: 1135, address: "0x447B8E40B0CdA8e55F405C86bC635D02d0540aB8", color: "#06B6D4", value: "0x0", data: "0x", gas: "0x927c0" },
+        mode: { id: 34443, address: "0x1231deb6f5749ef6ce6943a275a1d3e7486f4eae", color: "#EAB308", value: "0x0", data: "0x", gas: "0x927c0" },
+        optimism: { id: 10, address: "0x78255f1DeE074fb7084Ee124058A058dE0B1C251", color: "#DC2626", value: "0x0", data: "0x", gas: "0x927c0" },
+        plasma: { id: 9745, address: "0x026f252016a7c47cdef1f05a3fc9e20c92a49c37", color: "#166534", value: "0x0", data: "0x", gas: "0x927c0" },
+        plume: { id: 98866, address: "0x836CaF2409D91dF0bdA01BC9F3cEC524ba1c571D", color: "#F97316", value: "0x0", data: "0x", gas: "0x927c0" },
+        polygon: { id: 137, address: "0x1231DEB6f5749EF6cE6943a275A1D3E7486F4EaE", color: "#7C3AED", value: "0x0", data: "0x", gas: "0x927c0" },
+        rari: { id: 1380012617, address: "0x00000000AA467EbA42a3d604B3d74d63B2b6C6Cb", color: "#A855F7", value: "0x0", data: "0x", gas: "0x927c0" },
+        sei: { id: 1329, address: "0x1231DEB6f5749EF6cE6943a275A1D3E7486F4EaE", color: "#FF2D55", value: "0x0", data: "0x", gas: "0x927c0" },
+        soneium: { id: 1868, address: "0x99067E1C68f3a474f72cedF885f9f1fF7F0AAF5e", color: "#1D4ED8", value: "0x0", data: "0x", gas: "0x927c0" },
+        sonic: { id: 146, address: "0x9D05eD9C0258ce034c6788944841Fe5825eDa0c4", color: "#374151", value: "0x0", data: "0x", gas: "0x927c0" },
+        superposition: { id: 55244, address: "0xF3334049A3ce7e890bd4f8C6a0FBC70e38fd3746", color: "#14B8A6", value: "0x0", data: "0x", gas: "0x927c0" },
+        superseed: { id: 5330, address: "0x7F4babd2C7D35221e72Ab67Ea72Cba99573A0089", color: "#16A34A", value: "0x0", data: "0x", gas: "0x927c0" },
+        unichain: { id: 130, address: "0x198d69c8d8422D182EbbFEC9C35A31E003BcaD9a", color: "#D946EF", value: "0x0", data: "0x", gas: "0x927c0" },
+        worldchain: { id: 480, address: "0xa06e1351E2fD2D45b5D35633ca7eCF328684a109", color: "#2D3748", value: "0x0", data: "0x", gas: "0x927c0" },
+        zora: { id: 7777777, address: "0xa5F565650890fBA1824Ee0F21EbBbF660a179934", color: "#F59E0B", value: "0x0", data: "0x", gas: "0x927c0" },
+        megaeth_testnet: { id: 6342, address: "0x4D1E2145082d0AB0fDa4a973dC4887C7295e21aB", color: "#F87171", value: "0x0", data: "0x", gas: "0x927c0" },
+        monad_testnet: { id: 10143, address: "0xD22Ea6e9d5D01BbFca62Be7C1E549838178499C1", color: "#8B5CF6", value: "0x0", data: "0x", gas: "0x927c0" },
+        sahara_testnet: { id: 313313, address: "0xa5F565650890fBA1824Ee0F21EbBbF660a179934", color: "#FCD34D", value: "0x0", data: "0x", gas: "0x927c0" },
+
+        // Quêtes temporaires
+        gmink: { id: 57073, address: "0x9F500d075118272B3564ac6Ef2c70a9067Fd2d3F", color: "#FF2D55", value: "0x0", data: "0xe884624b0000000000000000000000001AC205EfecC2fE31377E273dB93F4Bb145C67A19", gas: "0x927c0" },
+        gmsuperpositon: { id: 55244, address: "0x7a8Ed5FB3E9B310c9c9DE78E605c2DaB35Ad2ccc", color: "#00C4B4", value: "0x0", data: "0x", gas: "0x927c0" },
+        baserelay: { id: 8453, address: "0xa5F565650890fBA1824Ee0F21EbBbF660a179934", color: "#0052FF", value: "0x0", data: "0x", gas: "0x927c0" },
+        gdollarfuse: { id: 122, address: "0xd253A5203817225e9768C05E5996d642fb96bA86", color: "#2ECC71", value: "0x0", data: "0x4e71d92d", gas: "0x927c0" },
+        gdollarcelo: { id: 42220, address: "0x43d72Ff17701B2DA814620735C39C620Ce0ea4A1", color: "#2ECC71", value: "0x0", data: "0x4e71d92d", gas: "0x927c0" },
+        lineaspin: { id: 59144, address: "0xDb3a3929269281F157A58D91289185F21E30A1e0", color: "#1F2937", value: "0x0", data: "0x", gas: "0x927c0" },
+        soneium_kyo: { id: 1868, address: "0xf4087AFfE358c1f267Cca84293abB89C4BD10712", color: "#1D4ED8", value: "0x0", data: "0x", gas: "0x927c0" },
+        soneium_ruby: { id: 1868, address: "0x6cf740D3145b71F705A9745A35b9C91f8B4F7DDF", color: "#1D4ED8", value: "0x0", data: "0x", gas: "0x927c0" },
+        soneium_play: { id: 1868, address: "0xC0f6015F69aD9a6768823cd029A5EF8a8f3eab89", color: "#1D4ED8", value: "0x0", data: "0x", gas: "0x927c0" },
+    };
+
+    const defaultVisibility = Object.keys(blockchains).reduce((a, k) => ({...a, [k]: true}), {});
+    let buttonVisibility = { ...defaultVisibility, ...GM_getValue("buttonVisibility", {}) };
+    let savedSelections = GM_getValue("savedSelections", {1:{...defaultVisibility},2:{...defaultVisibility},3:{...defaultVisibility},4:{...defaultVisibility},5:{...defaultVisibility}});
+    let isSavePending = false;
+
+    // === ICÔNE FLOTTANTE (reprise de l'ancienne version exacte) ===
+    const miniIcon = document.createElement("div");
+    miniIcon.style.cssText = `
+        position:fixed;top:10px;left:10px;z-index:10002;background:#FF5722;width:30px;height:30px;
+        border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;
+        box-shadow:0 0 5px rgba(0,0,0,0.3);
+    `;
+    const iconSpan = document.createElement("span");
+    iconSpan.textContent = "➕";
+    iconSpan.style.cssText = "color:#fff;font-size:18px;";
+    miniIcon.appendChild(iconSpan);
+
+    miniIcon.onclick = () => { container.style.display = "block"; miniIcon.style.display = "none"; };
+
+     // === BOUTON CROIX EN HAUT À DROITE (comme dans la vraie fenêtre de transaction) ===
+    const closeCross = document.createElement("button");
+    closeCross.textContent = "X";
+    closeCross.style.cssText = `
+        position:absolute;top:5px;right:5px;width:30px;height:30px;padding:0;background:#FF5722;color:#fff;
+        border:none;border-radius:50%;cursor:pointer;font-size:12px;line-height:20px;font-weight:bold;
+        box-shadow:0 0 5px rgba(0,0,0,0.3);z-index:10;
+    `;
+    closeCross.onclick = () => {
+        container.style.display = "none";
+        miniIcon.style.display = "flex";
+    };
+
+    // === FENÊTRE UNIQUE COMPACTE ===
+    const container = document.createElement("div");
+    container.style.cssText = `
+        position:fixed;top:10px;left:10px;z-index:10001;background:#fff;padding:10px;width:300px;
+        border:2px solid #000;border-radius:5px;box-shadow:0 0 10px rgba(0,0,0,0.5);
+        font-size:12px;font-family:Arial,sans-serif;max-height:90vh;overflow:hidden;display:none;
+    `;
+
+    const title = document.createElement("h3");
+    title.textContent = "OnChainCreatorTool v1.1";
+    title.style.margin = "0 0 8px 0";
+    title.style.fontSize = "14px";
+
+    const updateLabel = document.createElement("div");
+    updateLabel.textContent = "Up to date";
+    updateLabel.style.fontSize = "11px";
+    updateLabel.style.color = "#4CAF50";
+    updateLabel.style.marginBottom = "8px";
+
+    // Status + Connect
+    const status = document.createElement("div");
+    status.textContent = "Not connected";
+    status.style.cssText = "margin-bottom:8px;padding:5px;background:#f0f0f0;border-radius:3px;font-size:11px;";
+
+    const connectBtn = document.createElement("button");
+    connectBtn.textContent = "Connect";
+    connectBtn.style.cssText = "width:100%;padding:6px;background:#4CAF50;color:#fff;border:none;border-radius:3px;cursor:pointer;margin-bottom:8px;";
+
+    // Nombre de tx
+    const countLabel = document.createElement("div");
+    countLabel.textContent = "Number of transactions:";
+    countLabel.style.margin = "8px 0 4px 0";
+
+    const countInput = document.createElement("input");
+    countInput.type = "number"; countInput.value = 1; countInput.min = 1;
+    countInput.style.cssText = "width:60px;padding:4px;border:1px solid #ccc;border-radius:3px;margin-bottom:8px;";
+
+    // === ZONE DÉFILABLE POUR LES BOUTONS BLOCKCHAINS ===
+    const scrollArea = document.createElement("div");
+    scrollArea.style.cssText = "max-height:180px;overflow-y:auto;border:1px solid #ddd;border-radius:3px;padding:5px;margin-bottom:8px;background:#fafafa;";
+
+    const grid = document.createElement("div");
+    grid.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:5px;";
+
+    const buttons = {};
+    Object.entries(blockchains).forEach(([name, cfg]) => {
+        const b = document.createElement("button");
+        b.textContent = name.charAt(0).toUpperCase() + name.slice(1).replace(/_/g, " ");
+        b.style.cssText = `padding:6px;background:${cfg.color};color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:12px;
+                           display:${buttonVisibility[name] !== false ? "block" : "none"};`;
+        b.disabled = true;
+        b.onclick = () => sendTransfer(cfg.id, name, cfg.address);
+        buttons[name] = b;
+        grid.appendChild(b);
+    });
+    scrollArea.appendChild(grid);
+
+    const allBtn = document.createElement("button");
+    allBtn.textContent = "ALL";
+    allBtn.disabled = true;
+    allBtn.style.cssText = "width:100%;padding:6px;background:#2196F3;color:#fff;border:none;border-radius:3px;cursor:pointer;margin-bottom:8px;";
+
+    // === MENU DE SÉLECTION (comme avant) ===
+    const selectBtn = document.createElement("button");
+    selectBtn.textContent = "Select Blockchains";
+    selectBtn.style.cssText = "width:100%;padding:5px;background:#607D8B;color:#fff;border:none;border-radius:3px;cursor:pointer;margin-bottom:5px;";
+
+    const dropdown = document.createElement("div");
+    dropdown.style.cssText = "display:none;border:1px solid #ccc;padding:8px;background:#f9f9f9;border-radius:3px;max-height:150px;overflow-y:auto;margin-bottom:5px;";
+
+    Object.keys(blockchains).forEach(name => {
+        const div = document.createElement("div");
+        const cb = document.createElement("input");
+        cb.type = "checkbox"; cb.id = "cb"+name; cb.checked = buttonVisibility[name] !== false;
+        cb.style.marginRight = "5px";
+        const lbl = document.createElement("label");
+        lbl.htmlFor = cb.id;
+        lbl.textContent = name.charAt(0).toUpperCase() + name.slice(1);
+        div.appendChild(cb); div.appendChild(lbl);
+        dropdown.appendChild(div);
+
+        cb.onchange = () => {
+            buttonVisibility[name] = cb.checked;
+            buttons[name].style.display = cb.checked ? "block" : "none";
+            GM_setValue("buttonVisibility", buttonVisibility);
+        };
+    });
+
+    const quickRow = document.createElement("div");
+    quickRow.style.cssText = "display:flex;gap:4px;margin-bottom:5px;";
+
+    ["ALL","1","2","3","4","5","CLEAR"].forEach(t => {
+        const b = document.createElement("button");
+        b.textContent = t;
+        b.style.cssText = "flex:1;padding:5px;font-size:11px;color:#fff;border:none;border-radius:3px;cursor:pointer;";
+        b.style.background = t==="ALL" ? "#4CAF50" : t==="CLEAR" ? "#f44336" : "#607D8B";
+        quickRow.appendChild(b);
+
+        b.onclick = () => {
+            if (["1","2","3","4","5"].includes(t)) {
+                if (isSavePending) {
+                    savedSelections[t] = {...buttonVisibility};
+                    GM_setValue("savedSelections", savedSelections);
+                    alert("Saved in slot "+t);
+                    isSavePending = false;
+                    saveSelBtn.style.background = "#4CAF50";
+                } else {
+                    const sel = savedSelections[t] || defaultVisibility;
+                    Object.keys(blockchains).forEach(k => {
+                        buttonVisibility[k] = sel[k] !== false;
+                        buttons[k].style.display = buttonVisibility[k] ? "block" : "none";
+                        dropdown.querySelector("#cb"+k).checked = buttonVisibility[k];
+                    });
+                    GM_setValue("buttonVisibility", buttonVisibility);
+                }
+            } else if (t==="ALL") {
+                Object.keys(blockchains).forEach(k => { buttonVisibility[k]=true; buttons[k].style.display="block"; dropdown.querySelector("#cb"+k).checked=true; });
+                GM_setValue("buttonVisibility", buttonVisibility);
+            } else if (t==="CLEAR") {
+                Object.keys(blockchains).forEach(k => { buttonVisibility[k]=false; buttons[k].style.display="none"; dropdown.querySelector("#cb"+k).checked=false; });
+                GM_setValue("buttonVisibility", buttonVisibility);
+            }
+        };
+    });
+
+    const saveSelBtn = document.createElement("button");
+    saveSelBtn.textContent = "Save Selection";
+    saveSelBtn.style.cssText = "width:100%;padding:5px;background:#4CAF50;color:#fff;border:none;border-radius:3px;cursor:pointer;";
+    saveSelBtn.onclick = () => { isSavePending=true; saveSelBtn.style.background="#FF9800"; };
+
+    const closeBtn = document.createElement("button");
+    closeBtn.textContent = "Close";
+    closeBtn.style.cssText = "width:100%;padding:6px;margin-top:8px;background:#FF5722;color:#fff;border:none;border-radius:3px;cursor:pointer;";
+
+    // Assemblage
+    container.appendChild(title);
+    container.appendChild(closeCross);
+    container.appendChild(updateLabel);
+    container.appendChild(status);
+    container.appendChild(connectBtn);
+    container.appendChild(countLabel);
+    container.appendChild(countInput);
+    container.appendChild(scrollArea);
+    container.appendChild(allBtn);
+    container.appendChild(selectBtn);
+    container.appendChild(dropdown);
+    container.appendChild(quickRow);
+    container.appendChild(saveSelBtn);
+    container.appendChild(closeBtn);
+
+    document.body.appendChild(miniIcon);
+    document.body.appendChild(container);
+
+    // === OUVERTURE/FERMETURE ===
+    miniIcon.onclick = () => { container.style.display = "block"; miniIcon.style.display = "none"; };
+    closeBtn.onclick = () => { container.style.display = "none"; miniIcon.style.display = "flex"; };
+    selectBtn.onclick = () => dropdown.style.display = dropdown.style.display==="none" ? "block" : "none";
+
+    // === WALLET & TX ===
+    let account = null;
+    connectBtn.onclick = async () => {
+        if (!unsafeWindow.ethereum) return status.textContent = "No wallet";
+        try {
+            const accs = await unsafeWindow.ethereum.request({method:"eth_requestAccounts"});
+            account = accs[0];
+            status.textContent = `Connected: ${account.slice(0,6)}...${account.slice(-4)}`;
+            Object.values(buttons).forEach(b => b.disabled = false);
+            allBtn.disabled = false;
+        } catch { status.textContent = "Connect failed"; }
+    };
+
+    async function sendTransfer(id, name, to) {
+        if (!account) return;
+        const cnt = parseInt(countInput.value) || 1;
+        status.textContent = `Switching to ${name}...`;
+        try {
+            await unsafeWindow.ethereum.request({method:"wallet_switchEthereumChain", params:[{chainId:"0x"+id.toString(16)}]});
+            for (let i=0;i<cnt;i++) {
+                await unsafeWindow.ethereum.request({method:"eth_sendTransaction", params:[{from:account, to, value:"0x0", gas:"0x927c0"}]});
+                await new Promise(r=>setTimeout(r,1000));
+            }
+            status.textContent = `${cnt} tx OK on ${name}`;
+        } catch (e) {
+            status.textContent = e.code===4001 ? "Rejected" : "Error";
+        }
+    }
+
+    allBtn.onclick = async () => {
+        if (!account) return;
+        for (const [n, cfg] of Object.entries(blockchains)) {
+            if (buttonVisibility[n]) await sendTransfer(cfg.id, n, cfg.address);
+        }
+        status.textContent = "All done!";
+    };
+
+})();
