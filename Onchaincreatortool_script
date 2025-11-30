@@ -2,7 +2,7 @@
 // @name         OnChainCreatorTool - Final Compact
 // @namespace    http://tampermonkey.net/
 // @version      0.3.1
-// @description  Onchain Creator Tool - Tout en une, compact, avec update check
+// @description  Onchain Creator Tool
 // @author       Yun
 // @match        https://app.layer3.xyz/*
 // @grant        unsafeWindow
