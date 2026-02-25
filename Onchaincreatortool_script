@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         OnChainCreatorTool - Final Compact
 // @namespace    http://tampermonkey.net/
-// @version      0.3.2
+// @version      0.3.3
 // @description  Onchain Creator Tool
 // @author       Yun
 // @match        https://app.layer3.xyz/*
@@ -23,6 +23,7 @@
         bnb: { id: 56, address: "0xeeeeee9eC4769A09a76A83C7bC42b185872860eE", color: "#FACC15", value: "0x0", data: "0x", gas: "0x927c0" },
         bob: { id: 60808, address: "0x00000000aa467eba42a3d604b3d74d63b2b6c6cb", color: "#60A5FA", value: "0x0", data: "0x", gas: "0x927c0" },
         celo: { id: 42220, address: "0x2Fc617E933a52713247CE25730f6695920B3befe", color: "#FBBF24", value: "0x0", data: "0x", gas: "0x927c0" },
+        eth: { id: 1, address: "0x89c6340B1a1f4b25D36cd8B063D49045caF3f818", color: "#627EEA", value: "0x0", data: "0x", gas: "0x927c0" },
         ink: { id: 57073, address: "0x7F4babd2C7D35221e72Ab67Ea72Cba99573A0089", color: "#EF4444", value: "0x0", data: "0x", gas: "0x927c0" },
         katana: { id: 747474, address: "0x9ff28846CD0640BA4AAc04d3eBBE651cAc5FE609", color: "#FFD700", value: "0x0", data: "0x", gas: "0x927c0" },
         fuse: { id: 122, address: "0x2Fc617E933a52713247CE25730f6695920B3befe", color: "#22C55E", value: "0x0", data: "0x", gas: "0x927c0" },
